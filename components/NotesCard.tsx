@@ -1,6 +1,7 @@
 import { Edit, EllipsisVertical, Trash2Icon } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { useNotes } from '../services/useSave'
 import type { Note } from '../types/types'
 import AlertCard from './AlertCard'
@@ -8,6 +9,7 @@ import AlertCard from './AlertCard'
 
 const NotesCard = ({ title, body, id }: Note) => {
     const { deleteNote } = useNotes()
+    const router = useRouter()
     const [show, setShow] = useState(false)
     const [confirm, setConfirm] = useState(false)
 
@@ -19,6 +21,11 @@ const NotesCard = ({ title, body, id }: Note) => {
     const handleConfirm = () => {
         deleteNote(id)
         setConfirm(false)
+    }
+
+    const handleEdit = () => {
+        setShow(false)
+        router.push({ pathname: '/create', params: { id } })
     }
 
 
@@ -44,7 +51,7 @@ const NotesCard = ({ title, body, id }: Note) => {
                         <Trash2Icon size={15} color={'red'} />
                         <Text className='text-red-500'>Delete</Text>
                     </Pressable>
-                    <Pressable className='flex-row items-center'>
+                    <Pressable className='flex-row items-center' onPress={handleEdit}>
                         <Edit size={15} />
                         <Text>Edit</Text>
                     </Pressable>

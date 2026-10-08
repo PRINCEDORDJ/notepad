@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Save } from 'lucide-react-native';
 import { Pressable, StyleSheet, TextInput, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,14 +8,29 @@ import {useNotes} from '../../services/useSave'
 
 const Create = () => {
     const router = useRouter();
+    const { id } = useLocalSearchParams<{ id?: string }>();
     const [title, setTitle] = React.useState('');
     const [content, setContent] = React.useState('');
-    const {addNote} = useNotes();
+    const {addNote, updateNote, notes} = useNotes();
+    const editingNote = id ? notes.find((n) => n.id === id) : undefined;
+    const isUpdate = Boolean(id && editingNote);
+    const prefilledRef = React.useRef(false);
+
+    // Prefill the form once when the note to update becomes available
+    React.useEffect(() => {
+        if (editingNote && !prefilledRef.current) {
+            prefilledRef.current = true;
+            setTitle(editingNote.title);
+            setContent(editingNote.body);
+        }
+    }, [editingNote]);
+
     const handleSave = () => {
-        // Handle save logic here
-        console.log('Title:', title);
-        console.log('Content:', content);
-        addNote({ title, body: content });
+        if (isUpdate && id) {
+            updateNote(id, { title, body: content });
+        } else {
+            addNote({ title, body: content });
+        }
         setTitle('')
         setContent('')
         router.back();
